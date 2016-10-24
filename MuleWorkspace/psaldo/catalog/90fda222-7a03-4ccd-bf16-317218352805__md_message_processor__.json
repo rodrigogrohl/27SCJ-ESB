@@ -1,0 +1,16 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "Web_Service_Consumer",
+            "typeId": "getSaldoResponse"
+        }
+    },
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "getSaldoResponse"
+        }
+    },
+    "id": "90fda222-7a03-4ccd-bf16-317218352805",
+    "version": "5.2.0.0"
+}

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8081" basePath="saldo" doc:name="HTTP Listener Configuration"/>
+    <ws:consumer-config name="Web_Service_Consumer" service="IContaBancoService" port="IContaBancoPort" serviceAddress="http://localhost:8081/saldo" wsdlLocation="wsdl/saldo.wsdl" doc:name="Web Service Consumer"/>
+    <http:listener-config name="HTTP_Listener_Configuration_Proxy" host="localhost" port="8085" basePath="saldo/proxy" doc:name="HTTP Listener Configuration"/>
+    <flow name="psaldoFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <cxf:jaxws-service serviceClass="psaldobanco.IContaBanco" doc:name="CXF"/>
+        <component class="psaldobanco.ContaBanco" doc:name="Java"/>
+    </flow>
+    <flow name="ProxyFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration_Proxy" path="/" doc:name="HTTP"/>
+        <cxf:proxy-service namespace="http://psaldobanco/" service="IContaBancoService" payload="body" wsdlLocation="wsdl/saldoproxy.wsdl" doc:name="CXF"/>
+        <logger message="PRIMEIRO LOGGER: #[message.payloadAs(java.lang.String)]" level="INFO" doc:name="LOG1"/>
+        <dw:transform-message metadata:id="0f68884a-6a0f-4355-aaa7-b8509d0c9b3d" doc:name="Transform Message">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://psaldobanco/
+---
+{
+	ns0#getSaldo: {
+		arg0: {
+			agencia: payload.ns0#getSaldo.arg0.agencia as :string,
+			conta: payload.ns0#getSaldo.arg0.conta as :string,
+			name: payload.ns0#getSaldo.arg0.name
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="SEGUNDO LOGGER: #[message.payloadAs(java.lang.String)]" level="INFO" doc:name="LOG2"/>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="getSaldo" doc:name="Web Service Consumer"/>
+        <logger message="TERCEIRO LOGGER: #[message.payloadAs(java.lang.String)]" level="INFO" doc:name="LOG3"/>
+        <dw:transform-message metadata:id="90fda222-7a03-4ccd-bf16-317218352805" doc:name="Transform Message">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://psaldobanco/
+---
+{
+	ns0#getSaldoResponse: {
+		return: {
+			agenciaConta: payload.ns0#getSaldoResponse.return.agencia++ '/' ++ payload.ns0#getSaldoResponse.return.conta,
+			nomeAgencia: 'Agencia da Galera',
+			date: payload.ns0#getSaldoResponse.return.date,
+			name: payload.ns0#getSaldoResponse.return.name,
+			saldo: payload.ns0#getSaldoResponse.return.saldo,
+			currency: 'Reais'
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="&#218;LTIMO LOGGER: #[message.payloadAs(java.lang.String)]" level="INFO" doc:name="LOG4"/>
+    </flow>
+</mule>

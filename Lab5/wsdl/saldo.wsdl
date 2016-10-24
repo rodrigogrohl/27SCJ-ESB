@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://psaldobanco/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="IContaBancoService" targetNamespace="http://psaldobanco/">
+  <wsdl:types>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://psaldobanco/" elementFormDefault="unqualified" targetNamespace="http://psaldobanco/" version="1.0">
+
+  <xs:element name="getSaldo" type="tns:getSaldo"/>
+
+  <xs:element name="getSaldoResponse" type="tns:getSaldoResponse"/>
+
+  <xs:complexType name="getSaldo">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="arg0" type="tns:saldoRequest"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="saldoRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="agencia" type="xs:string"/>
+      <xs:element minOccurs="0" name="conta" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="getSaldoResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:saldoResponse"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="saldoResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="agencia" type="xs:string"/>
+      <xs:element minOccurs="0" name="conta" type="xs:string"/>
+      <xs:element minOccurs="0" name="date" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element name="saldo" type="xs:double"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="getSaldoResponse">
+    <wsdl:part element="tns:getSaldoResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getSaldo">
+    <wsdl:part element="tns:getSaldo" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="IContaBanco">
+    <wsdl:operation name="getSaldo">
+      <wsdl:input message="tns:getSaldo" name="getSaldo">
+    </wsdl:input>
+      <wsdl:output message="tns:getSaldoResponse" name="getSaldoResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="IContaBancoServiceSoapBinding" type="tns:IContaBanco">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getSaldo">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getSaldo">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getSaldoResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="IContaBancoService">
+    <wsdl:port binding="tns:IContaBancoServiceSoapBinding" name="IContaBancoPort">
+      <soap:address location="http://localhost:8081/saldo"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "ProxyInputDate"
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "0f68884a-6a0f-4355-aaa7-b8509d0c9b3d",
+    "version": "5.2.0.0"
+}

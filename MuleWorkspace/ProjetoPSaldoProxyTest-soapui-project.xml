@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psal="http://psaldobanco/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <psal:getSaldo>
+         <!--Optional:-->
+         <arg0>
+            <!--Optional:-->
+            <agencia>011</agencia>
+            <!--Optional:-->
+            <conta>12333</conta>
+            <!--Optional:-->
+            <name>Rodrtigo</name>
+         </arg0>
+      </psal:getSaldo>
+   </soapenv:Body>
+</soapenv:Envelope>

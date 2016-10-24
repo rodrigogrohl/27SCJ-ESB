@@ -1,0 +1,38 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://psaldobanco/" elementFormDefault="unqualified" targetNamespace="http://psaldobanco/" version="1.0">
+
+  <xs:element name="getSaldo" type="tns:getSaldo"/>
+
+  <xs:element name="getSaldoResponse" type="tns:getSaldoResponse"/>
+
+  <xs:complexType name="getSaldo">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="arg0" type="tns:saldoRequest"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="saldoRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="agencia" type="xs:integer"/>
+      <xs:element minOccurs="0" name="conta" type="xs:integer"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="getSaldoResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:saldoResponse"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="saldoResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="agenciaConta" type="xs:string"/>
+      <xs:element minOccurs="0" name="nomeAgencia" type="xs:string"/>
+      <xs:element minOccurs="0" name="date" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element name="saldo" type="xs:double"/>
+      <xs:element name="currency" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

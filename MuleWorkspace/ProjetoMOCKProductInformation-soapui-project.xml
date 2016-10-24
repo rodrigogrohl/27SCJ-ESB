@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:prod="http://www.fiap.com.br/ProductInformation" xmlns:prod1="http://www.fiap.com.br/product">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <prod:GetProduct>
+         <ProductIn>
+            <prod1:Id_product>1</prod1:Id_product>
+         </ProductIn>
+      </prod:GetProduct>
+   </soapenv:Body>
+</soapenv:Envelope>

@@ -1,0 +1,22 @@
+<xs:schema xmlns:tns="http://www.fiap.com.br/product" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.fiap.com.br/product" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="ProductIn" type="tns:ProductInTyp"/>
+	<xs:element name="ProductOut" type="tns:ProductOutTyp"/>
+	<xs:complexType name="ProductInTyp">
+			<xs:sequence>
+				<xs:element name="Id_product" type="xs:long"/>
+			</xs:sequence>
+		</xs:complexType>
+	<xs:complexType name="ProductOutTyp">
+		<xs:sequence>
+			<xs:element name="Id_product" type="xs:long"/>
+			<xs:element name="prodDesc" type="xs:string"/>
+			<xs:element name="Id_provider" type="xs:long"/>
+			<xs:element name="provDesc" type="xs:string"/>
+			<xs:element name="category" type="xs:string"/>
+			<xs:element name="size" type="xs:string"/>
+			<xs:element name="price" type="xs:string"/>
+			<xs:element name="Qty" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+</xs:schema>
