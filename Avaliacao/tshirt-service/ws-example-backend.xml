@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:kissmetrics="http://www.mulesoft.org/schema/mule/kissmetrics" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.4.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/kissmetrics http://www.mulesoft.org/schema/mule/kissmetrics/1.0-SNAPSHOT/mule-kissmetrics.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd">
+    <spring:beans> 
+        <spring:bean id="postgresqlJdbcBeanDataSource" class="org.postgresql.ds.PGPoolingDataSource" name="postgresqlJdbcBeanDataSource">
+            <spring:property name="serverName" value="${postgresql.serverName}"></spring:property>
+            <spring:property name="databaseName" value="${postgresql.databaseName}"></spring:property>
+            <spring:property name="portNumber" value="${postgresql.portNumber}"></spring:property>
+            <spring:property name="user" value="${postgresql.user}"></spring:property>
+            <spring:property name="password" value="${postgresql.password}"></spring:property>  
+        </spring:bean>  
+     </spring:beans>
+
+    <db:generic-config name="Generic_Database_Configuration" dataSource-ref="postgresqlJdbcBeanDataSource" doc:name="Generic Database Configuration"/>
+    <data-mapper:config name="list_map_to_pojo" transformationGraphPath="list_map_to_pojo.grf" doc:name="list_map_to_pojo"/>
+    <data-mapper:config name="list_map_to_pojo_2" transformationGraphPath="list_map_to_pojo_2.grf" doc:name="list_map_to_pojo_2"/>
+    
+     <kissmetrics:config name="Kiss_Metrics_Test" apiKey="${kissmetrics.apikey}" doc:name="Kiss Metrics">
+        <kissmetrics:connection-pooling-profile initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_GROW"/>
+    </kissmetrics:config>
+    <data-mapper:config name="list_map_to_pojo_1" transformationGraphPath="list_map_to_pojo_1.grf" doc:name="list_map_to_pojo_1"/>
+    <context:property-placeholder location="postgresql.properties,kissmetrics.properties"/>
+   
+    
+    <flow name="main-flow" doc:name="main-flow">
+        <http:inbound-endpoint exchange-pattern="request-response" host="localhost" port="8081"  doc:name="HTTP"/>
+        <cxf:jaxws-service port="TshirtServicePort" service="TshirtService" serviceClass="org.mulesoft.tshirt_service.TshirtServicePortType" doc:name="CXF"/>
+        
+        <choice doc:name="Choice">
+            <when expression="flowVars['cxf_operation'].localPart == 'ListInventory'">
+                <flow-ref name="list-inventory" doc:name="List Inventory"/>
+            </when>
+            <when expression="flowVars['cxf_operation'].localPart == 'OrderTshirt'">
+                <flow-ref name="order-tshirt" doc:name="Order T-Shirt"/>
+            </when>
+            <when expression="flowVars['cxf_operation'].localPart == 'TrackOrder'">
+                <flow-ref name="track-order" doc:name="Track Order"/>
+            </when>
+            <otherwise>
+                <scripting:component doc:name="Throw generic exception">
+                    <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception("An error has been produced", fault);]]></scripting:script>
+                </scripting:component>
+            </otherwise>
+        </choice>
+    </flow>
+    
+    <flow name="order-tshirt" doc:name="order-tshirt">
+        <scripting:component doc:name="Validate parameters">
+            <scripting:script engine="Groovy"><![CDATA[emailPattern = /[_A-Za-z0-9-]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})/
+
+parameterErrorMessage=""
+if(payload.email==null){
+	parameterErrorMessage="Email cannot be null"
+	
+} else if (!(payload.email ==~ emailPattern)){
+	parameterErrorMessage="Invalid email address"
+	
+} else if (payload.name==""){
+	parameterErrorMessage="Name cannot be null"
+	
+} else if (payload.size==null){
+	parameterErrorMessage="Size cannot be null. It should be S, M or L"
+	
+} else if (payload.city==""){
+	parameterErrorMessage="City cannot be null"
+	
+} else if (payload.country==""){
+	parameterErrorMessage="Country cannot be null"
+	
+} else if (payload.postalCode==""){
+	parameterErrorMessage="Postal Code cannot be null"
+	
+} else if (payload.address1==""){
+	parameterErrorMessage="Address1 cannot be null"
+	
+} else if (payload.stateOrProvince==""){
+	parameterErrorMessage="State or Province cannot be null"
+
+}
+
+if(parameterErrorMessage==""){
+	validParameters=true
+}else{
+	validParameters=false
+	message.setInvocationProperty('parameterErrorMessage', parameterErrorMessage)
+}
+message.setInvocationProperty('validParameters', validParameters)
+return payload]]></scripting:script>
+        </scripting:component>
+        <choice doc:name="Choice">
+            <when expression="#[flowVars['validParameters']==true]">
+                <enricher source="#[payload.size() &gt;0]" target="#[flowVars['orderExists']]" doc:name="Message Enricher">
+                    <db:select config-ref="Generic_Database_Configuration" doc:name="Check order existence">
+                        <db:parameterized-query><![CDATA[SELECT id FROM orders where email=#[payload.email]]]></db:parameterized-query>
+                    </db:select>
+                </enricher>
+                <choice doc:name="Choice">
+                    <when expression="#[flowVars['orderExists']==false]">
+                        <async doc:name="Async">
+                            <kissmetrics:record config-ref="Kiss_Metrics_Test" eventName="#['Order T-shirt']" person="#[payload.email]" doc:name="Kiss Metrics"/>
+                            <kissmetrics:set config-ref="Kiss_Metrics_Test" person="#[payload.email]" doc:name="Kiss Metrics">
+                                <kissmetrics:properties>
+                                    <kissmetrics:property key="host" value-ref="message.inboundProperties['Host']"/>
+                                </kissmetrics:properties>
+                            </kissmetrics:set>
+                        </async>
+                        <enricher source="#[payload]" target="#[flowVars['success']]" doc:name="Message Enricher">
+                            <db:insert config-ref="Generic_Database_Configuration" doc:name="Create Order">
+                                <db:parameterized-query><![CDATA[INSERT INTO orders (name,email,address1,address2,city,stateorprovince,postalcode,country,size) VALUES (#[payload.name],#[payload.email],#[payload.address1],#[payload.address2],#[payload.city],#[payload.stateOrProvince],#[payload.postalCode],#[payload.country],#[payload.size.toString()])]]></db:parameterized-query>
+                            </db:insert>
+                        </enricher>
+                        <db:select config-ref="Generic_Database_Configuration" doc:name="Retrieve order Id">
+                            <db:parameterized-query><![CDATA[SELECT id FROM orders where email=#[payload.email] LIMIT 1]]></db:parameterized-query>
+                        </db:select>
+                        <data-mapper:transform config-ref="list_map_to_pojo" doc:name="List&lt;Map&gt; To Pojo"/>
+                    </when>
+                    <when expression="#[flowVars['orderExists']==true]">
+                        <scripting:component doc:name="Order already exists">
+                            <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception("Order already exists for that email address", fault);]]></scripting:script>
+                        </scripting:component>
+                    </when>
+                    <otherwise>
+                        <scripting:component doc:name="Throw generic exception">
+                            <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception("An error has been produced", fault);]]></scripting:script>
+                        </scripting:component>
+                    </otherwise>
+                </choice>
+            </when>
+            <when expression="#[flowVars['validParameters']==false]">
+                <scripting:component doc:name="Throw invalid parameters exception">
+                    <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception(parameterErrorMessage, fault);]]></scripting:script>
+                </scripting:component>
+            </when>
+            <otherwise>
+                <scripting:component doc:name="Throw generic exception">
+                    <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception("An error has been produced", fault);]]></scripting:script>
+                </scripting:component>
+            </otherwise>
+        </choice>
+    </flow>
+    
+    <flow name="list-inventory" doc:name="list-inventory">
+        <db:select config-ref="Generic_Database_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[SELECT * from inventory]]></db:parameterized-query>
+        </db:select>
+        <data-mapper:transform config-ref="list_map_to_pojo_1" doc:name="List&lt;Map&gt; To Pojo"/>
+	</flow>
+    <flow name="track-order" doc:name="track-order">
+        <scripting:component doc:name="Validate parameters">
+            <scripting:script engine="Groovy"><![CDATA[emailPattern = /[_A-Za-z0-9-]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})/
+
+parameterErrorMessage=""
+
+if (!(payload.email ==~ emailPattern) && payload.orderId==null){
+	
+	parameterErrorMessage="Invalid parameters"
+	
+}
+
+if(parameterErrorMessage==""){
+	validParameters=true
+}else{
+	validParameters=false
+	message.setInvocationProperty('parameterErrorMessage', parameterErrorMessage)
+}
+message.setInvocationProperty('validParameters', validParameters)
+return payload]]></scripting:script>
+        </scripting:component>
+        <choice doc:name="Choice">
+            <when expression="#[flowVars['validParameters']==true]">
+                <db:select config-ref="Generic_Database_Configuration" doc:name="Retrieve order status">
+                    <db:parameterized-query><![CDATA[SELECT id,status,size from orders where id=#[payload.orderId.matches("-?\\d+(\\.\\d+)?")?java.lang.Integer.parseInt(payload.orderId):0] or email=#[payload.email] LIMIT 1]]></db:parameterized-query>
+                </db:select>
+                <data-mapper:transform config-ref="list_map_to_pojo_2" doc:name="List&lt;Map&gt; To Pojo"/>
+            </when>
+            <when expression="#[flowVars['validParameters']==false]">
+                <scripting:component doc:name="Throw invalid parameters exception">
+                    <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception(parameterErrorMessage, fault);]]></scripting:script>
+                </scripting:component>
+            </when>
+            <otherwise>
+                <scripting:component doc:name="Throw generic exception">
+                    <scripting:script engine="Groovy"><![CDATA[import org.mulesoft.tshirt_service.*
+
+TshirtFault fault = new TshirtFault();
+fault.setErrorMessage("No anda");
+
+throw new TshirtFault_Exception("An error has been produced", fault);]]></scripting:script>
+                </scripting:component>
+            </otherwise>
+        </choice>
+    </flow>
+</mule>

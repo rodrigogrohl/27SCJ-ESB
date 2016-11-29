@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Graph author="alejandrorascovan" created="Thu Feb 27 10:57:40 GMT-03:00 2014" description="List&lt;Map&gt; To Pojo" guiVersion="3.4.3.P" id="1393516779221" licenseCode="Unlicensed" licenseType="Unknown" modified="Thu Feb 27 10:57:40 GMT-03:00 2014" modifiedBy="alejandrorascovan" name="List_Map__To_Pojo" revision="1.0" showComponentDetails="false">
+<Global>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/Map" _dataStructure="SINGLE_DIMENSIONAL_COLLECTION" _id="__id" _type="Input" id="b7285833-a762-4232-81ce-cc1996ebdca0">
+<Record fieldDelimiter="," name="Map" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __implementationClass="java.lang.Integer" __index="0" __sourcePath="{}/Map/id" containerType="SINGLE" label="id" name="id" type="integer"/>
+<Field __implementationClass="java.lang.String" __index="2" __sourcePath="{}/Map/size" containerType="SINGLE" label="size" name="size" type="string"/>
+<Field __implementationClass="java.lang.String" __index="1" __sourcePath="{}/Map/status" containerType="SINGLE" label="status" name="status" type="string"/>
+</Record>
+</Metadata>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/object" _dataStructure="OBJECT" _id="__id" _type="Output" id="3d742961-4969-4e7b-8afd-2df6a3804b0f">
+<Record fieldDelimiter="," name="TrackOrderResponse" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __index="0" __sourcePath="{}/object/orderId" containerType="SINGLE" label="orderId" name="orderId" type="string"/>
+<Field __index="1" __sourcePath="{}/object/size" containerType="SINGLE" label="size" name="size" type="string"/>
+<Field __index="2" __sourcePath="{}/object/status" containerType="SINGLE" label="status" name="status" type="string"/>
+</Record>
+</Metadata>
+<Dictionary>
+<Entry id="DictionaryEntry0" input="true" name="inputPayload" output="false" type="object"/>
+<Entry id="DictionaryEntry1" input="false" name="outputPayload" output="true" type="object"/>
+</Dictionary>
+</Global>
+<Phase number="0">
+<Node enabled="enabled" fileURL="dict:inputPayload" guiName="Map&lt;k,v&gt; READER" guiX="20" guiY="20" id="BEAN_READER0" type="BEAN_READER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Context outPort="0" sequenceField="__id" xpath=".">
+  <Mapping cloverField="id" trim="true" xpath="id"/>
+  <Mapping cloverField="size" trim="true" xpath="size"/>
+  <Mapping cloverField="status" trim="true" xpath="status"/>
+</Context>
+]]></attr>
+<attr name="_data_format"><![CDATA[MAP]]></attr>
+<attr name="__metadata"><![CDATA[true]]></attr>
+</Node>
+<Node cacheInMemory="true" enabled="enabled" fileURL="dict:outputPayload" guiName="Pojo WRITER" guiX="900" guiY="20" id="BEAN_WRITER0" type="BEAN_WRITER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<object xmlns:clover="http://www.cloveretl.com/ns/xmlmapping" clover:inPort="0">
+  <orderId>$0.orderId</orderId>
+  <size>$0.size</size>
+  <status>$0.status</status>
+</object>]]></attr>
+<attr name="_data_format"><![CDATA[JAVA]]></attr>
+<attr name="schema"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<schema-object>
+  <typed-object-ref type-ref="org.mulesoft.tshirt_service.TrackOrderResponse"/>
+  <typed-object type="org.mulesoft.tshirt_service.Size"/>
+  <typed-object type="org.mulesoft.tshirt_service.TrackOrderResponse">
+    <typed-object-ref name="orderId" type-ref="java.lang.String"/>
+    <typed-object-ref name="size" type-ref="org.mulesoft.tshirt_service.Size"/>
+    <typed-object-ref name="status" type-ref="java.lang.String"/>
+  </typed-object>
+  <typed-object type="java.lang.String"/>
+</schema-object>
+]]></attr>
+</Node>
+<Node enabled="enabled" guiName="Foreach 'Map' -&gt; 'object'" guiX="460" guiY="20" id="FOREACH_MAP_OBJECT" transformClass="com.mulesoft.datamapper.transform.MelRecordTransform" type="REFORMAT">
+<attr name="melScript"><![CDATA[//MEL
+//START -> DO NOT REMOVE
+output.__id = input.__id;
+//END -> DO NOT REMOVE
+output.size = input.size;
+output.status = input.status;
+output.orderId = (isnull(input.id) ? null : num2str(input.id));]]></attr>
+</Node>
+<Edge debugMode="true" fromNode="BEAN_READER0:0" guiBendpoints="" id="Edge0" inPort="Port 0 (in)" metadata="b7285833-a762-4232-81ce-cc1996ebdca0" outPort="Port 0 (out)" toNode="FOREACH_MAP_OBJECT:0"/>
+<Edge debugMode="true" fromNode="FOREACH_MAP_OBJECT:0" guiBendpoints="" id="Edge1" inPort="Port 0 (in)" metadata="3d742961-4969-4e7b-8afd-2df6a3804b0f" outPort="Port 0 (out)" toNode="BEAN_WRITER0:0"/>
+</Phase>
+</Graph>

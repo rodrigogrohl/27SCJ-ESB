@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Graph author="alejandrorascovan" created="Fri Feb 28 10:45:19 GMT-03:00 2014" description="List&lt;Map&gt; To Pojo" guiVersion="3.4.3.P" id="1393596150303" licenseCode="Unlicensed" licenseType="Unknown" modified="Fri Feb 28 10:45:19 GMT-03:00 2014" modifiedBy="alejandrorascovan" name="List_Map__To_Pojo" revision="1.0" showComponentDetails="false">
+<Global>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/list" _dataStructure="SINGLE_DIMENSIONAL_COLLECTION" _id="__id" _type="Output" id="69504a69-80a0-496a-9c2f-ad034393bfc0">
+<Record fieldDelimiter="," name="list" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __index="0" __sourcePath="{}/list/count" containerType="SINGLE" label="count" name="count" type="integer"/>
+<Field __index="1" __sourcePath="{}/list/description" containerType="SINGLE" label="description" name="description" type="string"/>
+<Field __index="2" __sourcePath="{}/list/productCode" containerType="SINGLE" label="productCode" name="productCode" type="string"/>
+<Field __index="3" __sourcePath="{}/list/size" containerType="SINGLE" label="size" name="size" type="string"/>
+</Record>
+</Metadata>
+<Metadata __index="0" __referenceCounter="1" __sourcePath="{}/Map" _dataStructure="SINGLE_DIMENSIONAL_COLLECTION" _id="__id" _type="Input" id="7158bb38-7ad9-436a-86aa-3bc760d8db13">
+<Record fieldDelimiter="," name="Map" recordDelimiter="\n\\|\r\n\\|\r" type="delimited">
+<Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
+<Field __implementationClass="java.lang.Integer" __index="1" __sourcePath="{}/Map/count" containerType="SINGLE" label="count" name="count" type="integer"/>
+<Field __implementationClass="java.lang.String" __index="3" __sourcePath="{}/Map/description" containerType="SINGLE" label="description" name="description" type="string"/>
+<Field __implementationClass="java.lang.Integer" __index="0" __sourcePath="{}/Map/id" containerType="SINGLE" label="id" name="id" type="integer"/>
+<Field __implementationClass="java.lang.String" __index="2" __sourcePath="{}/Map/productCode" containerType="SINGLE" label="productCode" name="productCode" type="string"/>
+<Field __implementationClass="java.lang.String" __index="4" __sourcePath="{}/Map/size" containerType="SINGLE" label="size" name="size" type="string"/>
+</Record>
+</Metadata>
+<Dictionary>
+<Entry id="DictionaryEntry0" input="true" name="inputPayload" output="false" type="object"/>
+<Entry id="DictionaryEntry1" input="false" name="outputPayload" output="true" type="object"/>
+</Dictionary>
+</Global>
+<Phase number="0">
+<Node enabled="enabled" fileURL="dict:inputPayload" guiName="Map&lt;k,v&gt; READER" guiX="20" guiY="20" id="BEAN_READER0" type="BEAN_READER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Context outPort="0" sequenceField="__id" xpath=".">
+  <Mapping cloverField="count" trim="true" xpath="count"/>
+  <Mapping cloverField="description" trim="true" xpath="description"/>
+  <Mapping cloverField="id" trim="true" xpath="id"/>
+  <Mapping cloverField="productCode" trim="true" xpath="productCode"/>
+  <Mapping cloverField="size" trim="true" xpath="size"/>
+</Context>
+]]></attr>
+<attr name="_data_format"><![CDATA[MAP]]></attr>
+<attr name="__metadata"><![CDATA[true]]></attr>
+</Node>
+<Node cacheInMemory="true" enabled="enabled" fileURL="dict:outputPayload" guiName="Pojo WRITER" guiX="900" guiY="20" id="BEAN_WRITER0" type="BEAN_WRITER">
+<attr name="mapping"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<clover:collection clover:name="list" xmlns:clover="http://www.cloveretl.com/ns/xmlmapping">
+  <item clover:inPort="0">
+    <count>$0.count</count>
+    <description>$0.description</description>
+    <productCode>$0.productCode</productCode>
+    <size>$0.size</size>
+  </item>
+</clover:collection>]]></attr>
+<attr name="_data_format"><![CDATA[JAVA]]></attr>
+<attr name="schema"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<schema-object>
+  <schema-collection>
+    <typed-object-ref type-ref="org.mulesoft.tshirt_service.InventoryItem"/>
+  </schema-collection>
+  <typed-object type="org.mulesoft.tshirt_service.Size"/>
+  <typed-object type="java.math.BigInteger"/>
+  <typed-object type="java.lang.String"/>
+  <typed-object type="org.mulesoft.tshirt_service.InventoryItem">
+    <typed-object-ref name="count" type-ref="java.math.BigInteger"/>
+    <typed-object-ref name="description" type-ref="java.lang.String"/>
+    <typed-object-ref name="productCode" type-ref="java.lang.String"/>
+    <typed-object-ref name="size" type-ref="org.mulesoft.tshirt_service.Size"/>
+  </typed-object>
+</schema-object>
+]]></attr>
+</Node>
+<Node enabled="enabled" guiName="Foreach 'Map' -&gt; 'list'" guiX="460" guiY="20" id="FOREACH_MAP_LIST" transformClass="com.mulesoft.datamapper.transform.MelRecordTransform" type="REFORMAT">
+<attr name="melScript"><![CDATA[//MEL
+//START -> DO NOT REMOVE
+output.__id = input.__id;
+//END -> DO NOT REMOVE
+output.count = input.count;
+output.description = input.description;
+output.productCode = input.productCode;
+output.size = input.size;
+]]></attr>
+</Node>
+<Edge debugMode="true" fromNode="BEAN_READER0:0" guiBendpoints="" id="Edge0" inPort="Port 0 (in)" metadata="7158bb38-7ad9-436a-86aa-3bc760d8db13" outPort="Port 0 (out)" toNode="FOREACH_MAP_LIST:0"/>
+<Edge debugMode="true" fromNode="FOREACH_MAP_LIST:0" guiBendpoints="" id="Edge1" inPort="Port 0 (in)" metadata="69504a69-80a0-496a-9c2f-ad034393bfc0" outPort="Port 0 (out)" toNode="BEAN_WRITER0:0"/>
+</Phase>
+</Graph>
