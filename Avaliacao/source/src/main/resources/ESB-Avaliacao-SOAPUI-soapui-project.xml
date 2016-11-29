@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.fiap.com.br/">
+   <soapenv:Header>
+      <ser:credential>rodrigor</ser:credential>
+   </soapenv:Header>
+   <soapenv:Body>
+      <ser:helloWorld>
+         <!--Optional:-->
+         <name>Rodrigo Rocha</name>
+      </ser:helloWorld>
+   </soapenv:Body>
+</soapenv:Envelope>
