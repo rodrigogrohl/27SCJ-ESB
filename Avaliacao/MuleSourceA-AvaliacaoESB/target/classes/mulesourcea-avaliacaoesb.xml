@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:cxf="http://www.mulesoft.org/schema/mule/cxf" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/cxf http://www.mulesoft.org/schema/mule/cxf/current/mule-cxf.xsd
-http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd">
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
     <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8081" doc:name="HTTP Listener Configuration"/>
     <ws:consumer-config name="Web_Service_Consumer" service="CompraServiceImplService" port="CompraServiceImplPort" serviceAddress="http://localhost:9999/compra" wsdlLocation="http://localhost:9999/compra/aprovarCredito?wsdl" doc:name="Web Service Consumer"/>
+    <http:request-config name="HTTP_REST_Request_Configuration" host="localhost" port="80" doc:name="HTTP Request Configuration"/>
     <flow name="mulesourcea-avaliacaoesbFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
         <cxf:proxy-service namespace="http://impl.service.fiap.com.br/" service="CompraServiceImplService" payload="body" wsdlLocation="aprovarCredito.wsdl" doc:name="CXF"/>
+        <set-variable variableName="cpfVar" value="#[payload.'cpf']" doc:name="Variable"/>
+        <set-variable variableName="cxfPayload" value="#[message.payload]" doc:name="Variable"/>
+        <logger message="Proxy Chamando WS: Current path is #[message.inboundProperties.'http.request.path'] for server #[server.ip]" level="INFO" doc:name="Logger"/>
         <ws:consumer config-ref="Web_Service_Consumer" operation="aprovarCredito" doc:name="Web Service Consumer"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <logger message="Retorno WS cxfPayload: #[flowVars.cxfPayload] - CPF #[flowVars.cpfVar]" level="INFO" doc:name="Logger"/>
     </flow>
 </mule>
